@@ -1,5 +1,8 @@
 # Lua + wasm32-wasi
 
+Simple lua instance embedded in a wasm browser environement
+
+<br/>
 
 ### Dependencies
 
@@ -17,7 +20,6 @@ or directly change it in the makefile.
 
 ### Build
 
-Simple lua embedded in a wasm browser environement
 
 ```sh
 make
