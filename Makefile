@@ -1,5 +1,5 @@
 
-APP_NAME = luact
+APP_NAME = lua
 VERSION = 0.0.1
 LUA_VERSION=5.4.7
 

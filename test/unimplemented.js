@@ -57,3 +57,12 @@ const wasi_snapshot_preview1_unimplemented = [
     'sock_recv',
     'sock_send',
 ];
+
+function makeEnv(bind, symbols, implemented) {
+    const env = {};
+    const syms = [...new Set([...symbols, ...Object.keys(implemented)])];
+    for (let sym of syms) {
+        env[sym] = (implemented[sym] == undefined) ? (() => 0) : implemented[sym].bind(bind);
+    }
+    return env;
+}

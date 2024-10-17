@@ -1,17 +1,18 @@
-function makeEnv(bind, symbols, implemented) {
-    const env = {};
-    const syms = [...new Set([...symbols, ...Object.keys(implemented)])];
-    for (let sym of syms) {
-        env[sym] = (implemented[sym] == undefined) ? (() => 0) : implemented[sym].bind(bind);
+const lua_bindings = {
+    /*
+      Add environement specific bindings here
+     'this' is bound to the Lua prototype
+    */
+    alert(message_ptr) {
+        // Read the message string from wasm memory
+        const message = get_cstr(this.view, message_ptr);
+
+        // Call environement specific things
+        alert(message);
     }
-    return env;
 }
 
-const luact_bindings = {
-
-}
-
-class Luact {
+class Lua {
     constructor() {
         this.L = null;
         this.view = null;
@@ -19,8 +20,8 @@ class Luact {
         this.calls = {};
     };
 
-    async compile(luact_wasm_path) {
-        const response = await fetch(luact_wasm_path);
+    async compile(lua_wasm_path) {
+        const response = await fetch(lua_wasm_path);
         const buffer = await response.arrayBuffer();
         return await WebAssembly.compile(buffer);
     };
@@ -28,8 +29,8 @@ class Luact {
     async instantiate(module) {
         this.wasm = await WebAssembly.instantiate(module, {
             env: {
-                ...makeEnv(this, [], luact_bindings),
-                ...Luact.env
+                ...makeEnv(this, [], lua_bindings),
+                ...Lua.env
             },
             wasi_snapshot_preview1: makeEnv(this, wasi_snapshot_preview1_unimplemented, {
                 fd_write,
@@ -51,9 +52,9 @@ class Luact {
     }
 
     run(source) {
-        this.L = this.calls.luact_init();
+        this.L = this.calls.lua_init();
         const source_ptr = this.calls.malloc(source.length + 1);
-        this.calls.luact_run(this.L, write_cstr(this.wasm.exports.memory, source_ptr, source));
+        this.calls.lua_run(this.L, write_cstr(this.wasm.exports.memory, source_ptr, source));
         this.calls.free(source_ptr);
     }
 
@@ -83,7 +84,7 @@ class Luact {
             console.log(e.toString());
         }
     
-        this.calls.luact_close();
+        this.calls.lua_end();
     }
 
     wrap_calls(instance) {
@@ -103,19 +104,25 @@ class Luact {
 }
 
 window.onload = () => {
-    luact = new Luact();
+    lua = new Lua();
 
-    luact.compile('../bin/luact.wasm')
-        .then(module => luact.instantiate(module))
+    lua.compile('../bin/lua.wasm')
+        .then(module => lua.instantiate(module))
         .then(_ => {
+            const examples = [
+                'print("Hello world")',
+                'alert("This is a pop-up!")'
+            ]
             console.log(`
-Luact is ready !
+Lua is ready !
 
 Getting started:
 
-\x1b[94m>\x1b[0m \x1b[90mluact.run('print("Hello world")');\x1b[0m
+\x1b[94m > \x1b[0m lua.\x1b[33mrun\x1b[97m(\x1b[91m'${examples[0]}'\x1b[97m);\x1b[0m
+
+\x1b[94m > \x1b[0m lua.\x1b[33mrun\x1b[97m(\x1b[91m'${examples[1]}'\x1b[97m);\x1b[0m
             `);
         })
 
-    window.luact = luact;
+    window.lua = lua;
 }
