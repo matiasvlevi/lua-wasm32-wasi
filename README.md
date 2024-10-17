@@ -1,6 +1,6 @@
 # Lua + wasm32-wasi
 
-Simple lua instance embedded in a wasm browser environement
+Simple example of a lua interpretor embedded in a wasm browser environement.
 
 <br/>
 
