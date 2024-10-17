@@ -24,7 +24,7 @@ CC := $(WASI_SDK_PATH)/bin/clang
 AR := $(WASI_SDK_PATH)/bin/llvm-ar
 RANLIB := $(WASI_SDK_PATH)/bin/llvm-ranlib
 
-BIN = $(BINDIR)/$(PLATFORM)/$(APP_NAME)$(BIN_EXT)
+BIN = $(BINDIR)/$(APP_NAME)$(BIN_EXT)
 OBJDIR = $(BINDIR)/$(PLATFORM)/obj
 CFLAGS = \
 	-mllvm -wasm-enable-sjlj\
@@ -58,7 +58,7 @@ all: $(BIN)
 
 # Build lua static library
 $(LUA_A):
-	cd $(LUA_SRC) && make PLATFORM=$(PLATFORM)
+	cd $(LUA_SRC) && make PLATFORM=wasm
 
 # Build object files
 $(OBJDIR)/%$(OBJ_EXT): src/%.c $(LUA_A) $(HEADERS)

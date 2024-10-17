@@ -1,3 +1,10 @@
+
+const wasi_jmps = {
+    getTempRet0:() => 0,
+    saveSetjmp:() => 0,
+    testSetjmp:() => 0
+};
+
 let stderr_buf = '';
 
 function fd_write(fd,
